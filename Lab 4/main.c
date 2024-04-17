@@ -14,6 +14,7 @@ volatile uint8_t iBina = 0;
 volatile uint8_t idis1 = 0;
 volatile uint8_t idis2 = 0;
 volatile uint8_t iADC = 0;
+volatile uint8_t soytonto = 0;
 
 void initADC(void);
 void setup(void);
@@ -28,7 +29,7 @@ void setup(){
 	UCSR0B = 0;
 	PCICR |= (1 << PCIE1);
 	PCMSK1 |= (1 << PCINT11) | (1 << PCINT10);
-
+	soytonto = 0;
 	sei();
 
 	
@@ -78,15 +79,25 @@ int main(void)
 		ADCSRA |= (1<<ADSC);
 		PORTB = iBina;
 		PORTC = (PORTC & 0b11111100) | ((iBina & 0b11000000) >> 6);
-		
+
+		if ((iBina < iADC))
+		{
+			soytonto = 0b10000000;
+		} else if ((iBina > iADC))
+		{
+			soytonto = 0b00000000;
+		}
 		PORTC |= ((1<<PC4));
 		PORTC &= ~(1<<PC5);
-		PORTD = lista[idis1];
+		PORTD = (((lista[idis1]) & 0b01111111) | soytonto );
+		
 		_delay_ms(4);
 		PORTC |= ((1<<PC5));
 		PORTC &= ~(1<<PC4);
-		PORTD = lista[idis2];
+		PORTD = ((lista[idis2] & 0b01111111) | soytonto);
 		_delay_ms(4);
+		
+		
     }
 	return 0;
 }
